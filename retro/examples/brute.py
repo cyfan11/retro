@@ -83,7 +83,7 @@ def select_actions(root, action_space, max_episode_steps):
     current node at each step.
 
     We select actions for the longest possible episode, but normally these
-    will not all be used.  They will instead be truncated to the length
+    will not all be used.  They will instead be truncated to the length 
     of the actual episode and then used to update the tree.
     """
     node = root
@@ -108,6 +108,12 @@ def select_actions(root, action_space, max_episode_steps):
                     else:
                         act_value[act] = -np.inf
                 best_value = max(act_value.values())
+                sort = best_value.sort(reverse = True)
+                random = np.random.randint(10)
+                if random<8:
+                    best_value = max(act_value.values())
+                else:
+                    best_value = act_value[np.random.randint(action_space.n)]
                 best_acts = [
                     act for act, value in act_value.items() if value == best_value
                 ]
@@ -194,25 +200,28 @@ def brute_retro(
     env = Frameskip(env)
     env = TimeLimit(env, max_episode_steps=max_episode_steps)
 
-    brute = Brute(env, max_episode_steps=max_episode_steps)
-    timesteps = 0
-    best_rew = float('-inf')
-    while True:
-        acts, rew = brute.run()
-        timesteps += len(acts)
+    print("State Space {}".format(env.observation_space))
+    print("State Space {}".format(env.action_space))
+    print(env.unwrapped.get_action_meanings())
+    # brute = Brute(env, max_episode_steps=max_episode_steps)
+    # timesteps = 0
+    # best_rew = float('-inf')
+    # while True:
+    #     acts, rew = brute.run()
+    #     timesteps += len(acts)
 
-        if rew > best_rew:
-            print("new best reward {} => {}".format(best_rew, rew))
-            best_rew = rew
-            env.unwrapped.record_movie("best.bk2")
-            env.reset()
-            for act in acts:
-                env.step(act)
-            env.unwrapped.stop_record()
+    #     if rew > best_rew:
+    #         print("new best reward {} => {}".format(best_rew, rew))
+    #         best_rew = rew
+    #         env.unwrapped.record_movie("best.bk2")
+    #         env.reset()
+    #         for act in acts:
+    #             env.step(act)
+    #         env.unwrapped.stop_record()
 
-        if timesteps > timestep_limit:
-            print("timestep limit exceeded")
-            break
+    #     if timesteps > timestep_limit:
+    #         print("timestep limit exceeded")
+    #         break
 
 def main():
     parser = argparse.ArgumentParser()
@@ -222,7 +231,7 @@ def main():
     args = parser.parse_args()
 
     brute_retro(game=args.game, state=args.state, scenario=args.scenario)
-
+    
 
 if __name__ == "__main__":
     main()
